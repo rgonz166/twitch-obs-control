@@ -454,7 +454,7 @@ toggleGroup = (group, reward) => {
   });
 };
 
-toggleBitsGroup = (group, reward) => {};
+toggleBitsGroup = (group, reward) => { };
 
 mapSourceReward = () => {
   const currentReward = rewardsElement.value;
@@ -790,13 +790,11 @@ setRewardPointsList = (rewardPoints) => {
         <td class="mdl-data-table__cell--non-numeric reward">${key}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.scene}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.source}</td>
-        <td class="data-table-middle">${
-          val.time / 1000 === 0 ? 0 : (val.time - 1000) / 1000
-        }</td>
+        <td class="data-table-middle">${val.time / 1000 === 0 ? 0 : (val.time - 1000) / 1000
+      }</td>
         <td class="mdl-data-table__cell--non-numeric">${val.group}</td>
-        <td class="mdl-data-table__cell--non-numeric">${
-          val.random ? 'Yes' : 'No'
-        }</td>
+        <td class="mdl-data-table__cell--non-numeric">${val.random ? 'Yes' : 'No'
+      }</td>
         <td><i class="material-icons pointer" onclick="testReward(this)">play_arrow</i></td>
         <td><i class="material-icons pointer" onclick="editRow(this)">create</i></td>
         <td><i class="material-icons pointer" onclick="removeRow(this)">delete</i></td>`;
@@ -888,13 +886,11 @@ setBitsPointsList = (bitSourceData) => {
         <td class="mdl-data-table__cell--non-numeric reward">${key}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.scene}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.source}</td>
-        <td class="data-table-middle">${
-          val.time / 1000 === 0 ? 0 : (val.time - 1000) / 1000
-        }</td>
+        <td class="data-table-middle">${val.time / 1000 === 0 ? 0 : (val.time - 1000) / 1000
+      }</td>
         <td class="mdl-data-table__cell--non-numeric">${val.group}</td>
-        <td class="mdl-data-table__cell--non-numeric">${
-          val.random ? 'Yes' : 'No'
-        }</td>
+        <td class="mdl-data-table__cell--non-numeric">${val.random ? 'Yes' : 'No'
+      }</td>
         <td><i class="material-icons pointer" onclick="testBits(this)">play_arrow</i></td>
         <td><i class="material-icons pointer" onclick="editBitsRow(this)">create</i></td>
         <td><i class="material-icons pointer" onclick="removeBitsRow(this)">delete</i></td>`;
@@ -1106,7 +1102,7 @@ getToken = () => {
   shell.openExternal('https://twitchapps.com/tokengen/');
 };
 
-export const getTwitch = () => {
+const getTwitch = () => {
   shell
     .openExternal(
       'https://id.twitch.tv/oauth2/authorize?client_id=98a3op8i9g48ppw3ji60pw6qlcix52&redirect_uri=http://localhost&response_type=token&scope=chat:read'
