@@ -71,8 +71,10 @@ const obsSourcesElement = document.getElementById('sources');
 const timedElement = document.getElementById('time-input');
 const groupElement = document.getElementById('group-input');
 const randomElement = document.getElementById('random-input');
+const rewardVariabilityElement = document.getElementById('reward-variability')
 const randomLabelElement = document.getElementById('random-label');
 const pointsSourceListEl = document.getElementById('points-source-list');
+const rewardGroupSettingsListEl = document.getElementById('random-group-reward-table');
 // Bits
 const bitsInputElement = document.getElementById('bits-input');
 const obsScenesBitsElement = document.getElementById('bit-scenes');
@@ -367,6 +369,7 @@ const startTwitchListener = () => {
 const runToggles = (map, reward, user) => {
   if (map.has(reward)) {
     const currentSceneSource = map.get(reward);
+    console.log('currentSceneSource', currentSceneSource)
     if (currentSceneSource) {
       if (currentSceneSource.random) {
         toggleRandomSources(currentSceneSource, user);
@@ -455,6 +458,28 @@ const toggleGroup = (group, reward) => {
 };
 
 const toggleBitsGroup = (group, reward) => { };
+
+randomElement.addEventListener('change', (event) => {
+  if (event.currentTarget.checked) {
+    // alert('checked')
+    rewardVariabilityElement.removeAttribute('disabled')
+  } else {
+    // alert('unchecked')
+    rewardVariabilityElement.setAttribute('disabled', true)
+
+  }
+})
+
+const variabilityToggle = () => {
+  rewardGroupSettingsListEl.classList.toggle('hidden')
+}
+
+rewardVariabilityElement.addEventListener('change', (event) => {
+  console.log('event', event.target.value)
+  //Add button to add variability
+})
+
+
 
 const mapSourceReward = () => {
   const currentReward = rewardsElement.value;
@@ -1048,8 +1073,7 @@ const timedToggleRandomSource = (key, chosenMap) => {
     selectedFolder.rewardArray.shift();
     const currentArray = selectedFolder.rewards;
     console.log('currentArray', currentArray);
-    const currentReward =
-      currentArray[Math.floor(Math.random() * currentArray.length)];
+    const currentReward = currentArray[Math.floor(Math.random() * currentArray.length)];
     console.log('currentReward', currentReward);
     if (currentReward.type === 'ffmpeg_source') {
       obs.sendCallback(

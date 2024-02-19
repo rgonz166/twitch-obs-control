@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
     <link rel="stylesheet" href="index.css">
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./assets/css/loading-bar.css"/>
+    <script type="text/javascript" src="./assets/js/loading-bar.js"></script>
   </head>
   <body>
 
@@ -117,7 +119,41 @@
               <input type="checkbox" id="random-input" class="mdl-checkbox__input">
               <span class="mdl-checkbox__label">Is randomn group?</span>
             </label>
+            <br />
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" id="reward-variability" onclick="variabilityToggle()" disabled>
+              Add Variability
+            </button>
           </div>
+        </div>
+        <div class="random-group-settings">
+          <table class="hidden mdl-data-table mdl-js-data-table mdl-shadow--2dp list-table-props" id="random-group-reward-table">
+            <thead>
+              <tr>
+                <th>Folder</th>
+                <th>Sources</th>
+                <th>Percentages</th>
+                <th>Timed (MS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th id="folder-name" rowspan="2" scope="rowgroup">testFolder</th>
+                <th scope="row">1. Nice</th>
+                <td><input class="mdl-textfield__input text-right" type="number" id="perc-1" value="0"></td>
+                <td><input class="mdl-textfield__input text-right" type="number" id="time-1" value="2136"></td>
+              </tr>
+              <tr>
+                <th scope="row">2. Hecarim</th>
+                <td><input class="mdl-textfield__input text-right" type="number" id="perc-1" value="0"></td>
+                <td><input class="mdl-textfield__input text-right" type="number" id="time-1" value="21333"></td>
+              </tr>
+              <tr>
+                <td id="total-percentage" colspan="4">
+                  <div class="ldBar text-align" data-preset="line" data-value="30"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <form action="#" onsubmit="return false" class="points-button-list">
           <div class="button-list">

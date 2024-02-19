@@ -88,3 +88,27 @@ body {
 #show-dialog {
   background-color: var(--main-twitch-color);
 }
+
+#reward-variability {
+  margin-top: 30px;
+}
+
+#random-group-reward-table {
+  margin-top: 20px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+#folder-name {
+  vertical-align: middle;
+}
+
+.text-align {
+  text-align: center;
+}
+
+#total-percentage {
+  text-align: center;
+}
