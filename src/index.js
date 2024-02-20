@@ -1,5 +1,7 @@
 // const ExpressServer = require('./assets/js/server');
-const obs = new OBSWebSocket();
+const ObsWebSocket = require('obs-websocket-js');
+
+const obs = new ObsWebSocket();
 
 let currentScenes;
 let sceneMap = new Map();
@@ -7,6 +9,7 @@ let sourcesMap = new Map();
 let groupMap = new Map();
 let queueMap = new Map();
 let queueRandomMap = new Map();
+let randomPercSum = 0
 
 const store = new Store({
   configName: 'obs-proxy-settings',
@@ -35,6 +38,13 @@ const pointsSourceToggleStore = new Store({
     'points-source': JSON.stringify(new Map()),
   },
 });
+
+const pointsRandomWeightedStore = new Store({
+  configName: 'points-random-weighted-mapping',
+  defaults: {
+    'random-weighted': JSON.stringify(new Map())
+  }
+})
 
 const sourceGroupStore = new Store({
   configName: 'source-group',
@@ -474,12 +484,54 @@ const variabilityToggle = () => {
   rewardGroupSettingsListEl.classList.toggle('hidden')
 }
 
-rewardVariabilityElement.addEventListener('change', (event) => {
-  console.log('event', event.target.value)
-  //Add button to add variability
+obsSourcesElement.addEventListener('change', (event) => {
+  //TODO go here
+  const chosenSource = event.target.value;
+  console.log('chosenSource', chosenSource)
+  // console.log('event', event.target.value)
+  // Check if there is a weighted map if not run the obs send
+  const randomWeightedMap = getRandomWeightedMap()
+  console.log('randomWeightedMap', randomWeightedMap)
+  if (!randomWeightedMap.has(chosenSource)) {
+
+  } else {
+    obs.send('GetSceneList').then(async (data) => {
+      const currentScene = data.scenes.filter(scene => scene.name === obsScenesElement.value)
+      const currentSource = currentScene[0].sources.filter(source => source.name === chosenSource)[0]
+      console.log('currentSource', currentSource)
+      if (currentSource.type === 'group') {
+        const folderSources = currentSource.groupChildren;
+        console.log('folderSources', folderSources)
+        randomWeightedMap.set(chosenSource, folderSources)
+        setRandomWeightedMap(randomWeightedMap)
+        setRewardWeightedList(folderSources);
+
+      } else {
+        console.log('is not group')
+      }
+      // obsScenesElement
+      // obsSourcesElement
+    })
+  }
 })
 
+const addRandomSum = () => {
+  randomPercSum = 0
+  const randomSums = document.querySelectorAll('[name^=randSum]')
+  randomSums.forEach((element) => {
+    const currentElementVal = +element.value
+    randomPercSum += currentElementVal;
+  })
+  // Update randomPercSum dom
+  const percSumEl = document.getElementById('random-percent-sum');
+  percSumEl.innerText = randomPercSum;
+  // Check if sum is greater than 0 then disable add to list unless sum is 100
+  if (randomPercSum === 0 || randomPercSum === 100) {
 
+  } else {
+
+  }
+}
 
 const mapSourceReward = () => {
   const currentReward = rewardsElement.value;
@@ -489,6 +541,8 @@ const mapSourceReward = () => {
   const timedVal = numVal === 0 ? 0 : numVal + 1000;
   const groupVal = groupElement.value ? groupElement.value : 'None';
   const randomVal = randomElement.checked ? true : false;
+  // const randomWeighted = 
+
   if (
     currentReward &&
     sceneVal &&
@@ -579,6 +633,15 @@ const setBitsSourceMap = (map) => {
   setStoreMap(bitsSourceToggleStore, 'bits-source', map);
   setBitsPointsList(getBitsSourceMap());
 };
+
+const getRandomWeightedMap = () => {
+  return getStoreMap(pointsRandomWeightedStore, 'random-weighted')
+}
+
+const setRandomWeightedMap = (map) => {
+  setStoreMap(pointsRandomWeightedStore, 'random-weighted', map);
+
+}
 
 const getStoreMap = (store, key) => {
   const currentPointsSource = store.get(key);
@@ -926,6 +989,54 @@ const setBitsPointsList = (bitSourceData) => {
   bitsSourceListEl.appendChild(tbodyEl);
   setBitGroupStoreMapping();
 };
+
+// RANDOM WEIGHTED
+/**
+ * 
+ * @param {ObsWebSocket.SceneItem[] | undefined} folderSources 
+ */
+const setRewardWeightedList = (folderSources) => {
+  rewardGroupSettingsListEl.innerHTML = `
+  <thead>
+    <tr>
+      <th>Folder</th>
+      <th>Sources</th>
+      <th>Percentages</th>
+    </tr>
+  </thead>
+  `;
+  const tbodyEl = document.createElement('tbody');
+  folderSources.forEach((value, index) => {
+
+    const trEl = document.createElement('tr');
+    if (index === 0) {
+      let listItem = `
+      <th id="folder-name" rowspan="${folderSources.length}" scope="rowgroup">${value.parentGroupName}</th>
+      <th scope="row">${value.name}</th>
+      <td><input class="mdl-textfield__input text-right full-width" name="randSum[]" type="number" min="0" max="100" id="perc-${index}" value="0" onchange="addRandomSum()"></td>
+      `
+      trEl.innerHTML = listItem;
+    } else {
+      let listItem = `
+      <th scope="row">${value.name}</th>
+      <td><input class="mdl-textfield__input text-right full-width" name="randSum[]" type="number" min="0" max="100" id="perc-${index}" value="0" onchange="addRandomSum()"></td>
+      `
+      trEl.innerHTML = listItem;
+    }
+    tbodyEl.appendChild(trEl);
+  })
+  const percTrEl = document.createElement('tr');
+  const percListItem = `
+    <td id="total-percentage" colspan="3">
+      <div class="text-align" id="random-percent-sum">${randomPercSum}</div>
+    </td>
+  `
+  percTrEl.innerHTML = percListItem;
+
+  tbodyEl.appendChild(percTrEl);
+
+  rewardGroupSettingsListEl.appendChild(tbodyEl);
+}
 
 const testBits = (row) => {
   const currentBits =

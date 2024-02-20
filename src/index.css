@@ -112,3 +112,11 @@ body {
 #total-percentage {
   text-align: center;
 }
+
+.full-width {
+  width: 100% !important;
+}
+
+.random-group-settings {
+  width: 40%;
+}
