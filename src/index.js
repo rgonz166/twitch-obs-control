@@ -10,6 +10,7 @@ let groupMap = new Map();
 let queueMap = new Map();
 let queueRandomMap = new Map();
 let randomPercSum = 0
+let currentRandomWeightedMap = new Map();
 
 const store = new Store({
   configName: 'obs-proxy-settings',
@@ -491,8 +492,9 @@ obsSourcesElement.addEventListener('change', (event) => {
   // console.log('event', event.target.value)
   // Check if there is a weighted map if not run the obs send
   const randomWeightedMap = getRandomWeightedMap()
+  currentRandomWeightedMap = randomWeightedMap;
   console.log('randomWeightedMap', randomWeightedMap)
-  if (!randomWeightedMap.has(chosenSource)) {
+  if (randomWeightedMap.has(chosenSource)) {
 
   } else {
     obs.send('GetSceneList').then(async (data) => {
@@ -518,18 +520,28 @@ obsSourcesElement.addEventListener('change', (event) => {
 const addRandomSum = () => {
   randomPercSum = 0
   const randomSums = document.querySelectorAll('[name^=randSum]')
+  const addToListButtonEl = document.getElementById('add-to-list');
+  const currentRandomWeighted = currentRandomWeightedMap;
+  const currentMap = currentRandomWeighted.get(obsSourcesElement.value)
+  // TODO something broke here
+  let currentIndex = 0
   randomSums.forEach((element) => {
+    currentMap[currentIndex]['weighted'] = +element.value;
     const currentElementVal = +element.value
     randomPercSum += currentElementVal;
+    currentIndex++;
   })
+  console.log('currentMapUpdated', currentMap)
+  setRandomWeightedMap(currentMap);
+
   // Update randomPercSum dom
   const percSumEl = document.getElementById('random-percent-sum');
   percSumEl.innerText = randomPercSum;
   // Check if sum is greater than 0 then disable add to list unless sum is 100
   if (randomPercSum === 0 || randomPercSum === 100) {
-
+    addToListButtonEl.removeAttribute('disabled')
   } else {
-
+    addToListButtonEl.setAttribute('disabled', true)
   }
 }
 
@@ -1250,3 +1262,5 @@ const getTwitch = () => {
 };
 
 initNavbar();
+
+// TODO clear list add removing random list map
