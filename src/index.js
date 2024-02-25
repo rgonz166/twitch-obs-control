@@ -510,6 +510,9 @@ const mapSourceReward = () => {
   const timedVal = numVal === 0 ? 0 : numVal + 1000;
   const groupVal = groupElement.value ? groupElement.value : 'None';
   const randomVal = randomElement.checked ? true : false;
+  const isWeighted = randomVal && randomPercSum === 100 ? true : false;
+  const weightedSources = isWeighted ? currentRandomWeightedMap : null
+
   // const randomWeighted = 
 
   if (
@@ -527,7 +530,10 @@ const mapSourceReward = () => {
       time: timedVal,
       group: groupVal,
       random: randomVal,
+      isWeighted,
+      weightedSources
     });
+    console.log('currentPointsSourceMap', currentPointsSourceMap)
     setPointsSourceMap(currentPointsSourceMap);
   } else {
     const data = {
@@ -546,6 +552,8 @@ const mapSourceBits = () => {
   const timedVal = numVal === 0 ? 0 : numVal + 1000;
   const groupVal = groupBitsElement.value ? groupBitsElement.value : 'None';
   const randomBitsVal = randomBitsElement.checked ? true : false;
+  const isWeighted = randomBitsVal && randomPercSum === 100 ? true : false;
+  const weightedSources = isWeighted ? currentRandomWeightedMap : null
 
   if (
     currentBitsSelected &&
@@ -562,7 +570,10 @@ const mapSourceBits = () => {
       time: timedVal,
       group: groupVal,
       random: randomBitsVal,
+      isWeighted,
+      weightedSources
     });
+    console.log('curerntBitsSourceMap', currentBitsSelected)
     setBitsSourceMap(currentBitsSourceMap);
   } else {
     const data = {
