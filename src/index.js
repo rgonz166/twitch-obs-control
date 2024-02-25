@@ -232,7 +232,6 @@ const connectObs = () => {
       return obs.send('GetSceneList');
     })
     .then((data) => {
-      console.log('scene data', data);
       currentScenes = data.scenes;
       bitsCurrentScenes = data.scenes;
       data.scenes.forEach((scene) => {
@@ -259,7 +258,6 @@ const refreshObsScenes = () => {
   obs
     .send('GetSceneList')
     .then((data) => {
-      console.log('scene data', data);
       currentScenes = data.scenes;
       bitsCurrentScenes = data.scenes;
       data.scenes.forEach((scene) => {
@@ -355,7 +353,6 @@ const getRewards = async () => {
 const startTwitchListener = () => {
   // ComfyJS
   ComfyJS.onReward = (user, reward, cost, extra) => {
-    console.log('reward used', reward);
     let currentPointsSourceMap = getPointsSourceMap();
     runToggles(currentPointsSourceMap, reward, user);
   };
@@ -368,8 +365,6 @@ const startTwitchListener = () => {
       flags: flags,
       extra: extra,
     };
-    console.log('data', data);
-    console.log('dataJson', JSON.stringify(data));
 
     let currentBitsSourceMap = getBitsSourceMap();
     const currentBits = bits.toString();
@@ -380,7 +375,6 @@ const startTwitchListener = () => {
 const runToggles = (map, reward, user) => {
   if (map.has(reward)) {
     const currentSceneSource = map.get(reward);
-    console.log('currentSceneSource', currentSceneSource)
     if (currentSceneSource) {
       if (currentSceneSource.random) {
         toggleRandomSources(currentSceneSource, user);
@@ -488,22 +482,17 @@ const variabilityToggle = () => {
 obsSourcesElement.addEventListener('change', (event) => {
   //TODO go here
   const chosenSource = event.target.value;
-  console.log('chosenSource', chosenSource)
-  // console.log('event', event.target.value)
   // Check if there is a weighted map if not run the obs send
   const randomWeightedMap = getRandomWeightedMap()
   currentRandomWeightedMap = randomWeightedMap;
-  console.log('randomWeightedMap', randomWeightedMap)
   if (randomWeightedMap.has(chosenSource)) {
 
   } else {
     obs.send('GetSceneList').then(async (data) => {
       const currentScene = data.scenes.filter(scene => scene.name === obsScenesElement.value)
       const currentSource = currentScene[0].sources.filter(source => source.name === chosenSource)[0]
-      console.log('currentSource', currentSource)
       if (currentSource.type === 'group') {
         const folderSources = currentSource.groupChildren;
-        console.log('folderSources', folderSources)
         randomWeightedMap.set(chosenSource, folderSources)
         setRandomWeightedMap(randomWeightedMap)
         setRewardWeightedList(folderSources);
@@ -523,7 +512,6 @@ const addRandomSum = () => {
   const addToListButtonEl = document.getElementById('add-to-list');
   const currentRandomWeighted = currentRandomWeightedMap;
   const currentMap = currentRandomWeighted.get(obsSourcesElement.value)
-  // TODO something broke here
   let currentIndex = 0
   randomSums.forEach((element) => {
     currentMap[currentIndex]['weighted'] = +element.value;
@@ -531,7 +519,6 @@ const addRandomSum = () => {
     randomPercSum += currentElementVal;
     currentIndex++;
   })
-  console.log('currentMapUpdated', currentMap)
   setRandomWeightedMap(currentMap);
 
   // Update randomPercSum dom
@@ -1085,7 +1072,6 @@ const editBitsRow = (row) => {
 const removeBitsRow = (row) => {
   const currentReward =
     row.parentNode.parentNode.childNodes[0].nextSibling.innerHTML;
-  console.log('currentReward', currentReward);
   removeSingleBitsSource(currentReward);
 };
 
@@ -1195,9 +1181,7 @@ const timedToggleRandomSource = (key, chosenMap) => {
     selectedFolder.flag = true;
     selectedFolder.rewardArray.shift();
     const currentArray = selectedFolder.rewards;
-    console.log('currentArray', currentArray);
     const currentReward = currentArray[Math.floor(Math.random() * currentArray.length)];
-    console.log('currentReward', currentReward);
     if (currentReward.type === 'ffmpeg_source') {
       obs.sendCallback(
         'GetMediaDuration',
@@ -1230,7 +1214,6 @@ const timedToggleRandomSource = (key, chosenMap) => {
 };
 
 const toggleRandomSources = (folder, user) => {
-  console.log('folder', folder);
   obs.send('GetSceneList').then((data) => {
     const scenes = data.scenes;
     const currentScene = scenes.filter((scene) => scene.name === folder.scene);
