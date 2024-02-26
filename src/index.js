@@ -343,6 +343,7 @@ const startTwitchListener = () => {
 };
 
 const runToggles = (map, reward, user) => {
+  console.log('runTogglesMap', map)
   if (map.has(reward)) {
     const currentSceneSource = map.get(reward);
     if (currentSceneSource) {
@@ -414,7 +415,7 @@ const toggleRewardQueue = (queue) => {
 const toggleRandomRewardQueue = (queue) => {
   if (!queue.flag) {
     // queue.flag = true;
-    timedToggleRandomSource(queue.folder.source, queueRandomMap);
+    timedToggleRandomSource(queue.folder.source, queueRandomMap, queue);
   }
 };
 
@@ -464,6 +465,7 @@ obsSourcesElement.addEventListener('change', (event) => {
       if (currentSource.type === 'group') {
         const folderSources = currentSource.groupChildren;
         randomWeightedMap.set(chosenSource, folderSources)
+        console.log('randomWeightedMapSetting', randomWeightedMap)
         setRandomWeightedMap(randomWeightedMap)
         setRewardWeightedList(folderSources);
 
@@ -481,15 +483,16 @@ const addRandomSum = () => {
   const randomSums = document.querySelectorAll('[name^=randSum]')
   const addToListButtonEl = document.getElementById('add-to-list');
   const currentRandomWeighted = currentRandomWeightedMap;
-  const currentMap = currentRandomWeighted.get(obsSourcesElement.value)
+  const currentArray = currentRandomWeighted.get(obsSourcesElement.value)
   let currentIndex = 0
   randomSums.forEach((element) => {
-    currentMap[currentIndex]['weighted'] = +element.value;
+    currentArray[currentIndex]['weighted'] = +element.value;
     const currentElementVal = +element.value
     randomPercSum += currentElementVal;
     currentIndex++;
   })
-  setRandomWeightedMap(currentMap);
+  console.log('currentRandomSumMap', currentArray)
+  setRandomWeightedMap(currentArray);
 
   // Update randomPercSum dom
   const percSumEl = document.getElementById('random-percent-sum');
@@ -503,6 +506,7 @@ const addRandomSum = () => {
 }
 
 const mapSourceReward = () => {
+  console.log('currentRandomWeightedMap', currentRandomWeightedMap)
   const currentReward = rewardsElement.value;
   const sceneVal = obsScenesElement.value;
   const sourceVal = obsSourcesElement.value;
@@ -511,7 +515,8 @@ const mapSourceReward = () => {
   const groupVal = groupElement.value ? groupElement.value : 'None';
   const randomVal = randomElement.checked ? true : false;
   const isWeighted = randomVal && randomPercSum === 100 ? true : false;
-  const weightedSources = isWeighted ? currentRandomWeightedMap : null
+  const weightedSources = isWeighted ? currentRandomWeightedMap.get(sourceVal) : null
+  console.log('weightedSources', weightedSources)
 
   // const randomWeighted = 
 
@@ -620,7 +625,6 @@ const getRandomWeightedMap = () => {
 
 const setRandomWeightedMap = (map) => {
   setStoreMap(pointsRandomWeightedStore, 'random-weighted', map);
-
 }
 
 const getStoreMap = (store, key) => {
@@ -846,6 +850,7 @@ const setRewardPointsList = (rewardPoints) => {
         <th class="data-table-middle">Seconds</th>
         <th class="mdl-data-table__cell--non-numeric">Group</th>
         <th class="mdl-data-table__cell--non-numeric">Random?</th>
+        <th class="mdl-data-table__cell--non-numeric">Weighted?</th>
         <th width="10px"></th>
         <th width="10px"></th>
         <th width="10px"></th>
@@ -858,11 +863,10 @@ const setRewardPointsList = (rewardPoints) => {
         <td class="mdl-data-table__cell--non-numeric reward">${key}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.scene}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.source}</td>
-        <td class="data-table-middle">${val.time / 1000 === 0 ? 0 : (val.time - 1000) / 1000
-      }</td>
+        <td class="data-table-middle">${val.time / 1000 === 0 ? 0 : (val.time - 1000) / 1000}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.group}</td>
-        <td class="mdl-data-table__cell--non-numeric">${val.random ? 'Yes' : 'No'
-      }</td>
+        <td class="mdl-data-table__cell--non-numeric">${val.random ? 'Yes' : 'No'}</td>
+        <td class="mdl-data-table__cell--non-numeric">${val.isWeighted ? 'Yes' : 'No'}</td>
         <td><i class="material-icons pointer" onclick="testReward(this)">play_arrow</i></td>
         <td><i class="material-icons pointer" onclick="editRow(this)">create</i></td>
         <td><i class="material-icons pointer" onclick="removeRow(this)">delete</i></td>`;
@@ -942,6 +946,7 @@ const setBitsPointsList = (bitSourceData) => {
         <th class="data-table-middle">Seconds</th>
         <th class="mdl-data-table__cell--non-numeric">Group</th>
         <th class="mdl-data-table__cell--non-numeric">Random?</th>
+        <th class="mdl-data-table__cell--non-numeric">Weighted?</th>
         <th width="10px"></th>
         <th width="10px"></th>
         <th width="10px"></th>
@@ -958,6 +963,8 @@ const setBitsPointsList = (bitSourceData) => {
       }</td>
         <td class="mdl-data-table__cell--non-numeric">${val.group}</td>
         <td class="mdl-data-table__cell--non-numeric">${val.random ? 'Yes' : 'No'
+      }</td>
+        <td class="mdl-data-table__cell--non-numeric">${val.isWeighted ? 'Yes' : 'No'
       }</td>
         <td><i class="material-icons pointer" onclick="testBits(this)">play_arrow</i></td>
         <td><i class="material-icons pointer" onclick="editBitsRow(this)">create</i></td>
@@ -1156,13 +1163,27 @@ const timedToggleSource = (source, time) => {
   }
 };
 
-const timedToggleRandomSource = (key, chosenMap) => {
+const timedToggleRandomSource = (key, chosenMap, queue) => {
   const selectedFolder = chosenMap.get(key);
   if (selectedFolder.rewardArray.length > 0) {
     selectedFolder.flag = true;
     selectedFolder.rewardArray.shift();
+    let currentReward;
     const currentArray = selectedFolder.rewards;
-    const currentReward = currentArray[Math.floor(Math.random() * currentArray.length)];
+    console.log('queue', queue)
+    if (queue?.folder?.isWeighted) {
+      // logic for reward weighted
+      const randomWeight = Math.floor(Math.random() * 100);
+      let addedPercent = 0;
+      currentReward = queue.folder.weightedSources.find(f => {
+        addedPercent += f.weighted;
+        return randomWeight < addedPercent
+      })
+    } else {
+      // Logic for random reward
+      currentReward = currentArray[Math.floor(Math.random() * currentArray.length)];
+    }
+    console.log('currentReward', currentReward)
     if (currentReward.type === 'ffmpeg_source') {
       obs.sendCallback(
         'GetMediaDuration',
@@ -1179,7 +1200,7 @@ const timedToggleRandomSource = (key, chosenMap) => {
             setTimeout(() => {
               toggleSource(currentSourceName, false);
               if (selectedFolder.rewardArray.length > 0) {
-                timedToggleRandomSource(key, chosenMap);
+                timedToggleRandomSource(key, chosenMap, queue);
               } else {
                 selectedFolder.flag = false;
               }
@@ -1195,6 +1216,7 @@ const timedToggleRandomSource = (key, chosenMap) => {
 };
 
 const toggleRandomSources = (folder, user) => {
+  console.log('folder', folder)
   obs.send('GetSceneList').then((data) => {
     const scenes = data.scenes;
     const currentScene = scenes.filter((scene) => scene.name === folder.scene);
@@ -1204,7 +1226,7 @@ const toggleRandomSources = (folder, user) => {
     )[0];
     const groupedSources = currentFolder.groupChildren;
     checkQueueRandomStatus(folder.source, folder, groupedSources, user);
-    // queueRandomMap.set(folder.source, {rewards: groupedSources, flag: false})
+    // queueRandomMap.set(folder.source, { rewards: groupedSources, flag: false, folder })
   });
 };
 
